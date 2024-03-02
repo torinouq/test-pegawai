@@ -39,7 +39,7 @@ class Kontak extends RESTController {
         {
             // $this->client->publish('test', json_encode($kontak));
             $js = $this->nats_stream;
-            $js->jetstream('KONTAK', 'test', json_encode($kontak));
+            $js->jetstream('KONTAK', 'tambah', json_encode($kontak));
             $this->response([
                 'status' => true,
                 'data' => $kontak
@@ -75,19 +75,46 @@ class Kontak extends RESTController {
 
     public function index_post()
     {
-        $data = [
-            'nama' => $this->post('nama'),
-            'nomor' => $this->post('nomor')
-        ];
-
-        $this->kontak->insert($data);
-            $this->response([
-                'status' => true,
-                'message' => 'new kontak has been created'
-            ], RESTController::HTTP_CREATED);
-
+        $nama = $this->post('nama');
+        $nomor = $this->post('nomor');
     
+        if (!empty($nama) && !empty($nomor)) {
+            $data = [
+                'nama' => $nama,
+                'nomor' => $nomor
+            ];
+    
+            if ($this->kontak->insert($data)) {
+                // Jika insert berhasil
+                $kontak_id = $this->db->insert_id();
+                $response_data = [
+                    'id' => $kontak_id,
+                    'nama' => $nama,
+                    'nomor' => $nomor
+                ];
+                $js = $this->nats_stream;
+                $js->jetstream('KONTAK', 'tambah', json_encode($response_data));
+                $this->response([
+                    'status' => true,
+                    'message' => 'New kontak has been created',
+                    'data' => $response_data
+                ], RESTController::HTTP_CREATED);
+            } else {
+                // Jika insert gagal
+                $this->response([
+                    'status' => false,
+                    'message' => 'Failed to create new kontak'
+                ], RESTController::HTTP_BAD_REQUEST);
+            }
+        } else {
+            // Jika input tidak lengkap
+            $this->response([
+                'status' => false,
+                'message' => 'Nama dan nomor tidak boleh kosong'
+            ], RESTController::HTTP_BAD_REQUEST);
+        }
     }
+    
 
     public function index_put($id)
     {

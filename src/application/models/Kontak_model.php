@@ -14,7 +14,7 @@ class Kontak_model extends CI_Model
         return $this->db->get('telepon')->row();
     }
     public function insert($data) {
-        $this->db->insert('telepon', $data);
+        return $this->db->insert('telepon', $data);
     }
     public function update($id, $data) {
         $this->db->set($data);

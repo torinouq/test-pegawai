@@ -15,16 +15,16 @@ class Nats_stream {
         $this->stream = $this->nc->getApi();
     }
 
-    public function jetstream(string $name, string $subjects, $message) {
+    public function jetstream($name, $subjects, $message) {
         $s = $this->stream->getStream($name);
         $s->getConfiguration()
             ->setRetentionPolicy(RetentionPolicy::WORK_QUEUE)
             ->setStorageBackend(StorageBackend::FILE)
-            ->setSubjects([$subjects]);
+            ->setSubjects([$name . '.' . $subjects]);
         
         $s->createIfNotExists();
 
-        $s->put($subjects, $message);
+        $s->put($name . '.' . $subjects, $message);
 
         return $s;
     }
