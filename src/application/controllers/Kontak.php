@@ -93,7 +93,7 @@ class Kontak extends RESTController {
                     'nomor' => $nomor
                 ];
                 $js = $this->nats_stream;
-                $js->jetstream('KONTAK', 'tambah', json_encode($response_data));
+                $js->jetstream('telepon', 'tambah', json_encode($response_data));
                 $this->response([
                     'status' => true,
                     'message' => 'New kontak has been created',

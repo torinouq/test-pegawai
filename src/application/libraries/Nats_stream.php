@@ -18,8 +18,9 @@ class Nats_stream {
     public function jetstream($name, $subjects, $message) {
         $s = $this->stream->getStream($name);
         $s->getConfiguration()
-            ->setRetentionPolicy(RetentionPolicy::WORK_QUEUE)
-            ->setStorageBackend(StorageBackend::FILE)
+            ->setDenyDelete(false)
+            // ->setRetentionPolicy(RetentionPolicy::WORK_QUEUE)
+            ->setStorageBackend(StorageBackend::MEMORY)
             ->setSubjects([$name . '.' . $subjects]);
         
         $s->createIfNotExists();
